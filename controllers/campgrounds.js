@@ -13,8 +13,10 @@ module.exports.renderNewForm = (req, res) => {
   module.exports.createCampground = async(req, res, next) => {
     //if(!req.body.campground) throw new ExpressError('Invalid Campground Data', 400);-not required after installing joi
     const campground = new Campground(req.body.campground);
+    campground.images = req.files.map(f => ({url: f.path, filename: f.filename }))
     campground.author = req.user._id;
     await campground.save();
+    console.log(campground);
     req.flash('success', 'Successfully made a new Campground!');
     res.redirect(`/campgrounds/${campground._id}`)
    }

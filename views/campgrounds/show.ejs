@@ -1,12 +1,30 @@
 <% layout('layouts/boilerplate')%>
 <link rel="stylesheet" href="/stylesheets/stars.css">
 
+
 <div class="row">
     <div class="col-6">
+      <div id='map' style='width: 400px; height: 300px;'></div>
+      <div id="campgroundCarousel" class="carousel slide mt-3" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <% campground.images.forEach((img, i) => { %>
+          <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+            <img src="<%= img.url%>" class="d-block w-100" alt="">
+          </div>
+          <% }) %>
+        </div>
+       <% if(campground.images.length > 1) { %>
+        <button class="carousel-control-prev" type="button" data-bs-target="#campgroundCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#campgroundCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+        <% } %>
+      </div>
         <div class="card mb-3" style="width: 18rem;">
-          <% for(let img of campground.images) { %>
-            <img src="<%= img.url%>" class="card-img-top" alt="...">
-            <% } %>
             <div class="card-body">
               <h5 class="card-title"><%= campground.title%></h5>
               <p class="card-text"><%= campground.description%></p>
@@ -25,13 +43,13 @@
             </div>
             <% } %>
             <div class="card-footer text-muted">
-                2 days ago  <a href="/campgrounds">All Campgrounds</a>
+                2 days ago  
             </div>
           </div>
           </div>
           <div class="col-6">
            <% if(currentUser) { %> 
-          <h2>Leave a Review</h2>
+          <h2 style="color: white">Leave a Review</h2>
           <form action="/campgrounds/<%= campground._id%>/reviews" method="POST" class="mb-3 validated-form" novalidate>
         <!--   <div class="mb-3">
               <label class="form-label" for="rating">Rating</label>
@@ -51,9 +69,8 @@
               <input type="radio" id="first-rate5" name="review[rating]" value="5" />
               <label for="first-rate5" title="Amazing">5 stars</label>
             </fieldset>
-          </div>
             <div class="mb-3">
-              <label class="form-label" for="body">Review Text</label>
+              <label class="form-label" for="body" style="color: white">Review Text</label>
               <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3" required></textarea>
               <div class="valid-feedback">
                 Looks good!
@@ -79,5 +96,13 @@
           </div>
         </div>
           <% } %>
+        </div>
     </div>
 </div>
+
+<script>
+  const mapToken = '<%-process.env.MAPBOX_TOKEN%>';
+  const campground = <%- JSON.stringify(campground)%>
+  </script>
+
+<script src="/javascripts/showPageMap.js"></script>

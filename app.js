@@ -1,11 +1,11 @@
 if (process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 }
+
 const dotenv = require("dotenv"); // Define the dotenv package
 dotenv.config();
 const express = require('express');
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
 const ejsMate = require('ejs-mate');
 const Joi = require('joi');
 const session = require('express-session');
@@ -16,11 +16,12 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const mongoSanitize = require('express-mongo-sanitize');
-
-
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewsRoutes = require('./routes/reviews');
+const MongoDBStore = require('connect-mongo');
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
+mongoose.connect(dbUrl, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -40,9 +41,21 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(mongoSanitize())
 
-const sessionConfig = {
+const secret = process.env.SECRET || 'donotdiscloseitissecret';
 
-    secret: 'thisishowtokeepsecret',
+const store = new MongoDBStore({
+    mongoUrl: dbUrl,
+    secret,
+    touchAfter: 20 * 60 * 60
+});
+
+store.on("error", function(e) {
+    console.log("SESSION STORE ERROR", e)
+})
+
+const sessionConfig = {
+    store,
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
